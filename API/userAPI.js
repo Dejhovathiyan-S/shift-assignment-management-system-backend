@@ -3,6 +3,7 @@ const express = require("express")
 const bcrypt = require("bcrypt")
 const User = require("../models/userModel")
 const jwt = require("jsonwebtoken")
+const auth = require("../middlewares/auth")
 const router = express.Router()
 router.post("/signup",
     async(req,res)=>{
@@ -56,5 +57,31 @@ router.post("/login",
         return res.json({message:"login successful", token:token})
     }
 )
+
+// Get current user info
+router.get("/me", auth, async (req, res) => {
+    try {
+        const user = await User.findById(req.user).select("-password")
+        if (!user) {
+            return res.json({ message: "User not found" })
+        }
+        res.json({ user })
+    } catch (err) {
+        console.log(err)
+        res.json({ message: "Error fetching user info" })
+    }
+})
+
+// Logout (client-side token removal, server acknowledgment)
+router.post("/logout", auth, async (req, res) => {
+    try {
+        // JWT is stateless, so logout is handled client-side by removing token
+        // This endpoint just confirms the logout action
+        res.json({ message: "Logout successful. Please remove token from client." })
+    } catch (err) {
+        console.log(err)
+        res.json({ message: "Error during logout" })
+    }
+})
 
 module.exports = router
