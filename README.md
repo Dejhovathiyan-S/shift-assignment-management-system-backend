@@ -250,5 +250,170 @@ Authorization: Bearer <token>
 - Role-based Authorization
 - Environment Variables for Sensitive Data
 
+##  Testing with Postman
+
+1. **Register a Manager:**
+   - POST `/users/signup` with `"role": "MANAGER"`
+
+2. **Login as Manager:**
+   - POST `/users/login` → Copy token
+
+3. **Create Shifts:**
+   - POST `/shifts/create` with Authorization header
+
+4. **Register a Staff:**
+   - POST `/users/signup` with `"role": "STAFF"`
+
+5. **Login as Staff:**
+   - POST `/users/login` → Copy token
+
+6. **Request a Shift:**
+   - POST `/shift-requests/create` with shift ID
+
+7. **Approve Request (as Manager):**
+   - PUT `/shift-requests/approve/:id`
+
+8. **View Assignments:**
+   - GET `/assignments/my-assignments` (Staff)
+   - GET `/assignments/all` (Manager)
+
+
+
+##  Database Schema
+
+
+### 1. User Schema
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `_id` | ObjectId | Auto-generated unique identifier |
+| `name` | String | User's full name |
+| `email` | String | User's email address |
+| `password` | String | Hashed password (bcrypt) |
+| `role` | String | User role - `STAFF` or `MANAGER` (default: `STAFF`) |
+| `age` | Number | User's age |
+
+```javascript
+{
+  name: String,
+  email: String,
+  password: String,
+  role: { type: String, enum: ["STAFF", "MANAGER"], default: "STAFF" },
+  age: Number
+}
+```
+
+---
+
+### 2. Shift Schema
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `_id` | ObjectId | Auto-generated unique identifier |
+| `title` | String | Shift title (required) |
+| `date` | Date | Shift date (required) |
+| `startTime` | String | Shift start time (required) |
+| `endTime` | String | Shift end time (required) |
+| `createdBy` | ObjectId | Reference to User (Manager) who created the shift |
+| `status` | String | `AVAILABLE` or `ASSIGNED` (default: `AVAILABLE`) |
+| `createdOn` | Date | Timestamp of creation (default: now) |
+
+```javascript
+{
+  title: { type: String, required: true },
+  date: { type: Date, required: true },
+  startTime: { type: String, required: true },
+  endTime: { type: String, required: true },
+  createdBy: { type: ObjectId, ref: "User", required: true },
+  status: { type: String, enum: ["AVAILABLE", "ASSIGNED"], default: "AVAILABLE" },
+  createdOn: { type: Date, default: Date.now }
+}
+```
+
+---
+
+### 3. Shift Request Schema
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `_id` | ObjectId | Auto-generated unique identifier |
+| `shift` | ObjectId | Reference to Shift (required) |
+| `requestedBy` | ObjectId | Reference to User (Staff) who requested (required) |
+| `status` | String | `PENDING`, `APPROVED`, or `REJECTED` (default: `PENDING`) |
+| `reason` | String | Reason for requesting the shift |
+| `rejectionReason` | String | Reason for rejection (if rejected) |
+| `requestedOn` | Date | Timestamp of request (default: now) |
+| `actionTakenOn` | Date | Timestamp when action was taken |
+
+```javascript
+{
+  shift: { type: ObjectId, ref: "Shift", required: true },
+  requestedBy: { type: ObjectId, ref: "User", required: true },
+  status: { type: String, enum: ["PENDING", "APPROVED", "REJECTED"], default: "PENDING" },
+  reason: String,
+  rejectionReason: String,
+  requestedOn: { type: Date, default: Date.now },
+  actionTakenOn: Date
+}
+```
+
+---
+
+### 4. Assignment Schema
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `_id` | ObjectId | Auto-generated unique identifier |
+| `shift` | ObjectId | Reference to Shift (required) |
+| `assignedTo` | ObjectId | Reference to User (Staff) assigned (required) |
+| `assignedOn` | Date | Timestamp of assignment (default: now) |
+| `status` | String | `ACTIVE`, `COMPLETED`, or `CANCELLED` (default: `ACTIVE`) |
+
+```javascript
+{
+  shift: { type: ObjectId, ref: "Shift", required: true },
+  assignedTo: { type: ObjectId, ref: "User", required: true },
+  assignedOn: { type: Date, default: Date.now },
+  status: { type: String, enum: ["ACTIVE", "COMPLETED", "CANCELLED"], default: "ACTIVE" }
+}
+```
+
+---
+
+### 5. Request Schema (Change Requests)
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `_id` | ObjectId | Auto-generated unique identifier |
+| `title` | String | Request title |
+| `description` | String | Request description |
+| `status` | String | Request status |
+| `priority` | String | `LOW`, `MEDIUM`, or `HIGH` |
+| `requestedOn` | Date | Timestamp of request (default: now) |
+| `actionTakenOn` | Date | Timestamp when action was taken |
+| `requestedBy` | ObjectId | Reference to User who made the request |
+| `requestedTo` | ObjectId | Reference to User who receives the request |
+
+```javascript
+{
+  title: String,
+  description: String,
+  status: String,
+  priority: { type: String, enum: ["LOW", "MEDIUM", "HIGH"] },
+  requestedOn: { type: Date, default: Date.now },
+  actionTakenOn: Date,
+  requestedBy: { type: ObjectId, ref: "User" },
+  requestedTo: { type: ObjectId, ref: "User" }
+}
+```
+
+##  Deployment
+---
+**Live API URL:** https://shift-assignment-management-system-heoy.onrender.com
+
+
+
+
+
 
 
