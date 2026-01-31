@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
+require("dotenv").config();
 
 module.exports = () => {
-    mongoose.connect("mongodb://localhost:27017/test-rms-db").
+    mongoose.connect(process.env.DB_URL).
         then(()=>{console.log("Database Connected")}).
         catch((err)=>{console.log(err)})
 }
