@@ -45,7 +45,7 @@ router.post("/login",
         if(!user){
             return res.json({"message":"Email is invalid"})
         }
-        const isPasswordMatching = bcrypt.compare(req.body.password,user.password)
+        const isPasswordMatching = await bcrypt.compare(req.body.password,user.password)
         if(!isPasswordMatching){
             return res.json({"message":"password invalid"})
         }
@@ -69,6 +69,30 @@ router.get("/me", auth, async (req, res) => {
     } catch (err) {
         console.log(err)
         res.json({ message: "Error fetching user info" })
+    }
+})
+
+// Forgot Password / Reset Password
+router.put("/forgot-password", async (req, res) => {
+    try {
+        const { email, newPassword } = req.body
+        if (!email || !newPassword) {
+            return res.json({ message: "Email and new password are required" })
+        }
+        if (newPassword.length <= 8) {
+            return res.json({ message: "Password is too short, minimum 9 characters required" })
+        }
+        const user = await User.findOne({ email: email })
+        if (!user) {
+            return res.json({ message: "No account found with this email" })
+        }
+        const hashedPassword = await bcrypt.hash(newPassword, 10)
+        user.password = hashedPassword
+        await user.save()
+        return res.json({ message: "success" })
+    } catch (err) {
+        console.log(err)
+        res.json({ message: "Error resetting password" })
     }
 })
 
