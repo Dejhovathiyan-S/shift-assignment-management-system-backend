@@ -15,8 +15,28 @@ router.post("/signup",
         if(!email || !password){
             res.json({"message":"invalid request"})
         }
-        if(password.length<=8){
-            return res.json({"message":"password is too short minimum 8 characters required"})
+        if(password.length < 5){
+            return res.json({"message":"Password must be at least 5 characters"})
+        }
+        
+        // Check for uppercase letter
+        if (!/[A-Z]/.test(password)) {
+            return res.json({ message: "Password must have at least one uppercase letter" })
+        }
+        
+        // Check for lowercase letter
+        if (!/[a-z]/.test(password)) {
+            return res.json({ message: "Password must have at least one lowercase letter" })
+        }
+        
+        // Check for number
+        if (!/[0-9]/.test(password)) {
+            return res.json({ message: "Password must have at least one number" })
+        }
+        
+        // Check for special character
+        if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+            return res.json({ message: "Password must have at least one special character" })
         }
 
         const userCheck = await User.findOne({email:email}) //to find one record matching findOne
@@ -79,9 +99,30 @@ router.put("/forgot-password", async (req, res) => {
         if (!email || !newPassword) {
             return res.json({ message: "Email and new password are required" })
         }
-        if (newPassword.length <= 8) {
-            return res.json({ message: "Password is too short, minimum 9 characters required" })
+        if (newPassword.length < 5) {
+            return res.json({ message: "Password must be at least 5 characters" })
         }
+        
+        // Check for uppercase letter
+        if (!/[A-Z]/.test(newPassword)) {
+            return res.json({ message: "Password must have at least one uppercase letter" })
+        }
+        
+        // Check for lowercase letter
+        if (!/[a-z]/.test(newPassword)) {
+            return res.json({ message: "Password must have at least one lowercase letter" })
+        }
+        
+        // Check for number
+        if (!/[0-9]/.test(newPassword)) {
+            return res.json({ message: "Password must have at least one number" })
+        }
+        
+        // Check for special character
+        if (!/[!@#$%^&*(),.?":{}|<>]/.test(newPassword)) {
+            return res.json({ message: "Password must have at least one special character" })
+        }
+        
         const user = await User.findOne({ email: email })
         if (!user) {
             return res.json({ message: "No account found with this email" })
