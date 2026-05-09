@@ -1,15 +1,19 @@
 const mongoose = require("mongoose")
 
 const userSchema = mongoose.Schema({
-    name:String,
-    email:String,
-    role:{
-        type:String,
-        enum:["STAFF","MANAGER"],
-        default:"STAFF"
+    name: String,
+    email: String,
+    role: {
+        type: String,
+        enum: ["STAFF", "MANAGER"],
+        default: "STAFF"
     },
-    age:Number,
-    password:String
+    age: Number,
+    password: String,
+    isTempPassword: {
+        type: Boolean,
+        default: false
+    }
 })
 
 const User = mongoose.model("User",userSchema) //creating a model for user schema
